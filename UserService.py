@@ -2,6 +2,8 @@ import requests
 import os
 import json
 import configparser
+import time
+from tqdm import tqdm
 
 config = configparser.ConfigParser()
 config.read("settings.ini")
@@ -35,7 +37,8 @@ class UserService:
         response = requests.get(self.get_photos_method_url, params=params)
         profile_list = response.json()
 
-        for file in profile_list['response']['items']:
+        for file in tqdm(profile_list['response']['items']):
+            time.sleep(3)
             self.size = file['sizes'][-1]['type']
             photo_url = file['sizes'][-1]['src']
             file_name = file['likes']['count']
@@ -46,7 +49,8 @@ class UserService:
     def upload_photo(self):
         headers = {'Content-Type': 'application/json',
                    'Authorization': config['yadisk_api']['api_token']}
-        for photo in self._get_photos_from_folder():
+        for photo in tqdm(self._get_photos_from_folder()):
+            time.sleep(3)
             params = {'path': f'{self.file_path}/{photo}'}
             get_upload_url = requests.get(self.get_upload_url_api, headers=headers, params=params)
             get_url = get_upload_url.json()
