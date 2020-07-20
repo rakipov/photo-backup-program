@@ -16,3 +16,4 @@
 .idea
 .venv
 .task_plan
+/venv/
