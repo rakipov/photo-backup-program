@@ -48,8 +48,9 @@ class UserService:
             with open(f'{self.download_file_path}/{file_name}.jpg', 'wb') as f:
                 f.write(download_photo.content)
 
-    def create_folder(self):
-        params = {'path': self.download_file_path}
+    def create_folder(self, mkdir_path=str):
+        self.mkdir_path = mkdir_path
+        params = {'path': mkdir_path}
         headers = {'Content-Type': 'application/json',
                    'Authorization': TOKEN_YADISK}
         create_dir = requests.api.put(self.mkdir_url, headers=headers, params=params)
@@ -57,9 +58,11 @@ class UserService:
     def upload_photo(self):
         headers = {'Content-Type': 'application/json',
                    'Authorization': TOKEN_YADISK}
+        logs_list = []
+
         for photo in tqdm(self._get_photos_from_folder()):
             time.sleep(3)
-            params = {'path': f'{self.file_path}/{photo}'}
+            params = {'path': f'{self.mkdir_path}/{photo}'}
             get_upload_url = requests.get(self.get_upload_url_api, headers=headers, params=params)
             get_url = get_upload_url.json()
             upload_url = get_url['href']
@@ -67,8 +70,10 @@ class UserService:
             status = file_upload.status_code
 
             download_log = {'file_name': photo, 'size': self.size}
-            with open('files/log.json', 'a') as photo:
-                print(download_log, file=photo)
+            logs_list.append(download_log)
+
+        with open('files/log.json', 'a') as file:
+            json.dump(logs_list, file, indent=2)
 
         if 500 > status != 400:
             print('Фотографии успешно загружены!')
@@ -79,5 +84,5 @@ class UserService:
 if __name__ == '__main__':
     user1 = UserService(17198266, TOKEN_VK)
     save_photos = user1.get_photos_method(user1.user_id)
-    create_dir = user1.create_folder()
+    user1.create_folder('test_folder')
     back_up = user1.upload_photo()
