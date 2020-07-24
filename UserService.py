@@ -14,7 +14,7 @@ TOKEN_YADISK = config['yadisk_api']['api_token']
 
 class UserService:
 
-    def __init__(self, user_id, token=str):
+    def __init__(self, user_id, token: str):
         self.user_id = user_id
         self.token = token
         self.api_version = config['vk_api']['api_version']
@@ -48,9 +48,9 @@ class UserService:
             with open(f'{self.download_file_path}/{file_name}.jpg', 'wb') as f:
                 f.write(download_photo.content)
 
-    def create_folder(self, mkdir_path=str):
-        self.mkdir_path = mkdir_path
-        params = {'path': mkdir_path}
+    def create_folder(self):
+        # self.mkdir_path = mkdir_path
+        params = {'path': self.file_path}
         headers = {'Content-Type': 'application/json',
                    'Authorization': TOKEN_YADISK}
         create_dir = requests.api.put(self.mkdir_url, headers=headers, params=params)
@@ -62,7 +62,7 @@ class UserService:
 
         for photo in tqdm(self._get_photos_from_folder()):
             time.sleep(3)
-            params = {'path': f'{self.mkdir_path}/{photo}'}
+            params = {'path': f'{self.file_path}/{photo}'}
             get_upload_url = requests.get(self.get_upload_url_api, headers=headers, params=params)
             get_url = get_upload_url.json()
             upload_url = get_url['href']
@@ -84,5 +84,5 @@ class UserService:
 if __name__ == '__main__':
     user1 = UserService(17198266, TOKEN_VK)
     save_photos = user1.get_photos_method(user1.user_id)
-    user1.create_folder('test_folder')
+    user1.create_folder()
     back_up = user1.upload_photo()
